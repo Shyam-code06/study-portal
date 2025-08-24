@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Portal — Creative Education Theme</title>
+    <style>
+        /* --------------------------- Theme & Vars --------------------------- */
+        :root {
+            --brand: #1e90ff;
+            --accent: #ffb84d;
+            --muted: #6b7280;
+            --panel: #ffffff;
+            --bg-glass: rgba(255,255,255,0.20);
+            --glass-blur: blur(18px);
+            --radius-lg: 18px;
+            --radius-md: 12px;
+            --shadow-1: 0 8px 30px rgba(17,24,39,0.06);
+            --shadow-2: 0 12px 44px rgba(17,24,39,0.08);
+            --shadow-glow: 0 0 18px rgba(30,144,255,0.18);
+            font-family: "Inter","Segoe UI", Roboto, sans-serif;
+            --transition-fast: .25s ease;
+            --transition-smooth: all .35s cubic-bezier(.4,0,.2,1);
+        }
+
+        /* reset + layout basics */
+        * { box-sizing: border-box; }
+        html, body, #app { height: 100%; }
+        body {
+            margin: 0;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            padding: 38px;
+            background: linear-gradient(-45deg, #e6f7ff, #d9f7e9, #fff1e6, #f0e6ff);
+            background-size: 400% 400%;
+            animation: gradientMove 18s linear infinite;
+            position: relative;
+            overflow-x: hidden;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* floating organic blobs (decorative, behind UI) */
+        .bg-blob {
+            position: fixed;
+            pointer-events: none;
+            filter: blur(36px) saturate(120%);
+            opacity: .6;
+            mix-blend-mode: screen;
+            transform-origin: center;
+            z-index: 0;
+        }
+        .blob1 { width: 420px; height: 420px; left: -120px; top: -80px; background: radial-gradient(circle at 30% 30%, rgba(30,144,255,0.85), rgba(0,198,255,0.35)); animation: float1 12s ease-in-out infinite; }
+        .blob2 { width: 360px; height: 360px; right: -140px; bottom: -60px; background: radial-gradient(circle at 70% 40%, rgba(255,184,77,0.85), rgba(255,126,95,0.25)); animation: float2 14s ease-in-out infinite; }
+        .blob3 { width: 260px; height: 260px; left: 20%; bottom: 30%; background: radial-gradient(circle at 40% 60%, rgba(34,197,94,0.86), rgba(74,222,128,0.22)); animation: float3 10s ease-in-out infinite; }
+        @keyframes float1 { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(24px) rotate(8deg); } 100% { transform: translateY(0) rotate(0deg); } }
+        @keyframes float2 { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(-6deg); } 100% { transform: translateY(0) rotate(0deg); } }
+        @keyframes float3 { 0% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(18px) rotate(5deg); } 100% { transform: translateY(0) rotate(0deg); } }
+
+        /* --------------------------- App layout --------------------------- */
+        .wrap { width: 100%; max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; position: relative; z-index: 2; }
+
+        /* --------------------------- Top nav --------------------------- */
+        header.topbar {
+            display: flex;
+            height: 100px;
+            align-items: center;
+            gap: 22px;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.12);
+            color: #0b1b2a;
+            padding: 14px 18px;
+            border-radius: 14px;
+            box-shadow: var(--shadow-2);
+            backdrop-filter: var(--glass-blur);
+            top: 12px;
+            z-index: 60;
+        }
+        .brand { display: flex; align-items: center; gap: 18px; }
+        .logo { width: 66px; height: 66px; border-radius: 12px; background: linear-gradient(180deg, #fff, #e6f7ff); display: grid; place-items: center; font-weight: 800; color: var(--brand); font-size: 20px; box-shadow: var(--shadow-1); }
+        .brand h1 { margin: 0; font-size: 1.4rem; line-height: 1; }
+        .small { font-size: 0.9rem; color: var(--muted); }
+
+        /* nav */
+        nav.topnav { display: flex; gap: 10px; align-items: center; }
+        nav.topnav button { background: transparent; border: none; color: #071835; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; transition: background .15s, transform .08s; }
+        nav.topnav button.active, nav.topnav button:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+
+        /* --------------------------- Hero --------------------------- */
+        .hero { display: flex; gap: 16px; align-items: center; justify-content: space-between; }
+        .hero-left { display: flex; flex-direction: column; gap: 6px; }
+        .hero h2 { margin: 0; font-size: 1.45rem; background: linear-gradient(135deg, var(--brand), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { margin: 0; color: var(--muted); }
+
+        /* --------------------------- Grid and cards --------------------------- */
+        .grid { 
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            margin-top: 20px;
+            margin-bottom: 30px;
+            width: 80%;
+        }
+        .card { 
+            background: var(--panel); 
+            border-radius: var(--radius-lg); 
+            padding: 18px; 
+            box-shadow: var(--shadow-1); 
+            transition: transform .22s, box-shadow .22s; 
+            cursor: pointer; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            text-align: center; 
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: var(--shadow-2); }
+        .card .icon { font-size: 28px; width: 56px; height: 56px; border-radius: 12px; background: linear-gradient(180deg, #fff, #f2fbff); display: grid; place-items: center; margin-bottom: 10px; }
+        .card h3 { margin: 6px 0 0 0; font-size: 1rem; }
+        .card p { margin: 8px 0 0 0; color: var(--muted); font-size: 0.9rem; }
+
+        /* --------------------------- Units list --------------------------- */
+        .units { display: flex; flex-direction: column; gap: 12px; }
+        .unit { display: flex; gap: 12px; padding: 14px; border-radius: 12px; background: linear-gradient(180deg, #fff, #fbfeff); box-shadow: var(--shadow-1); align-items: center; justify-content: space-between; transition: transform .18s; }
+        .unit:hover { transform: translateX(6px); }
+        .unit .left { display: flex; gap: 12px; align-items: center; flex: 1; }
+        .unit .meta { color: var(--muted); font-size: 0.9rem; }
+        .unit .actions { display: flex; gap: 8px; align-items: center; }
+
+        /* --------------------------- Buttons --------------------------- */
+        .btn { background: var(--brand); color: white; padding: 8px 12px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 700; }
+        .btn.ghost { background: transparent; border: 1px solid rgba(17,24,39,0.06); color: var(--brand); }
+
+        /* --------------------------- Downloads & saved items --------------------------- */
+        .download-list { display: flex; flex-direction: column; gap: 10px; }
+        .download-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 10px; background: var(--panel); box-shadow: var(--shadow-1); }
+        .download-item .meta { color: var(--muted); font-size: 0.9rem; }
+
+        /* --------------------------- Footer --------------------------- */
+        footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px 12px 0 0;
+            box-shadow: var(--shadow-1);
+            margin-top: auto;
+            margin-bottom: 20px;
+        }
+
+        /* --------------------------- Accessibility / small --------------------------- */
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+        /* --------------------------- Responsive --------------------------- */
+        @media (max-width: 900px) {
+            body { padding: 20px; }
+            header.topbar { flex-direction: row; height: auto; padding: 12px; }
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* Mobile (phones) */
+        @media (max-width: 720px) {
+            .hero { flex-direction: column; align-items: flex-start; gap: 12px; }
+            nav.topnav { display: none; position: absolute; top: 100%; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); flex-direction: column; padding: 10px; border-radius: 12px; box-shadow: var(--shadow-2); width: 180px; z-index: 100; }
+            nav.topnav.show { display: flex; }
+            .grid { grid-template-columns: 1fr; }
+            .unit { flex-direction: column; align-items: flex-start; gap: 8px; }
+            footer { margin-top: auto; font-size: 0.8rem; padding: 10px; }
+            .wrap { padding: 8px; }
+        }
+
+        /* Very small screens (tiny phones) */
+        @media (max-width: 420px) {
+            .brand h1 { font-size: 1rem; }
+            .grid { grid-template-columns: 1fr; }
+            footer { font-size: 0.75rem; padding: 8px; margin-bottom: 10px; }
+        }
+
+        /* --------------------------- Hamburger Menu --------------------------- */
+        .menu-toggle {
+            display: none;
+            font-size: 26px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: #071835;
+        }
+
+        @media (max-width: 720px) {
+            .menu-toggle { display: block; }
+        }
+
+        /* --------------------------- Toast notification --------------------------- */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- decorative blobs behind app -->
+    <div class="bg-blob blob1" aria-hidden="true"></div>
+    <div class="bg-blob blob2" aria-hidden="true"></div>
+    <div class="bg-blob blob3" aria-hidden="true"></div>
+
+    <!-- Toast notification for download feedback -->
+    <div class="toast" id="downloadToast"></div>
+
+    <div class="wrap" id="app">
+        <!-- Top header -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo">EDU</div>
+                <h1>EduVault – Smart Academic Resource Portal</h1>
+            </div>
+            
+            <!-- hamburger menu button -->
+            <button class="menu-toggle" aria-label="Toggle menu">☰</button>
+            
+            <nav class="topnav">
+                <button data-view="home" class="active">Home</button>
+                <button data-view="about">About</button>
+            </nav>
+        </header>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero-left">
+                <h2 id="pageTitle">Welcome Learner 👋</h2>
+                <p class="small">Tap a subject to explore categories, units and downloadable PDFs.(A web portal designed to help GCET students easily access study materials and downloadable resources.)</p>
+            </div>
+        </section>
+
+        <!-- Main content area -->
+        <main id="mainContent">
+            <!-- HOME view -->
+            <section id="view-home">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h3 style="margin:0">Subjects</h3>
+                    <div class="small">Explore by subject</div>
+                </div>
+                <div style="height:12px"></div>
+                <div id="subjectsGrid" class="grid" aria-live="polite"></div>
+            </section>
+
+            <!-- SUBJECT view -->
+            <section id="view-subject" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h3 id="subjectTitle" style="margin:0">Subject</h3>
+                        <div id="subjectDesc" class="small">Categories</div>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn ghost" id="backToHomeBtn">← Home</button>
+                    </div>
+                </div>
+                <div style="height:12px"></div>
+                <div id="categoriesGrid" class="grid"></div>
+            </section>
+
+            <!-- UNITS view -->
+            <section id="view-units" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h3 id="unitsTitle" style="margin:0">Units</h3>
+                        <div id="unitsDesc" class="small">Tap a unit to open downloads</div>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button class="btn ghost" id="backToSubjectBtn">← Categories</button>
+                    </div>
+                </div>
+                <div style="height:12px"></div>
+                <div id="unitsList" class="units"></div>
+            </section>
+
+            <!-- DOWNLOADS view -->
+            <section id="view-downloads" style="display:none;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h3 style="margin:0">show</h3>
+                    <div class="small">Files you saved from units</div>
+                </div>
+                <div style="height:12px"></div>
+                <div id="savedDownloadsList" class="download-list"></div>
+            </section>
+
+            <!-- ABOUT view -->
+            <section id="view-about" style="display:none;">
+                <h3>About Study Portal</h3>
+                <p class="small">This Study Portal is a creative web application designed specifically for GCET students to make learning easier and more organized.
+Students can browse subjects, explore categories, and access units with downloadable PDFs.</p>
+                <p class="small">It provides a responsive, mobile-friendly interface so learners can study anytime, anywhere.
+The portal tracks downloads, helping students keep all important resources in one place.</p>
+                <p class="small">Features include:</p>
+                <ul class="small">
+                    <li>Subject and category browsing</li>
+                    <li>Download tracking</li>
+                    <li>Responsive design for all devices</li>
+                </ul>
+            </section>
+        </main>
+
+        <footer>
+            Study Portal &copy; 2025 — Creative Education Theme
+        </footer>
+    </div>
+
+    <script>
+        /* ============================ App Data & State ============================ */
+        const DATA = {
+            subjects: ["Physics","Chemistry","Mathematics","Computer Science","Biology","English"],
+            categories: [
+                {icon:"📘", name:"Study Material"},
+                {icon:"📝", name:"Exam Papers"},
+                {icon:"⚗️", name:"Lab Manuals"},
+            ],
+            units: ["Unit 1 — Sound","Unit 2 — Theory","Unit 3 — Applications","Unit 4 — Problems","Unit 5 — Revision"],
+            sampleLinks: {
+                "Physics::Study Material::Unit 1 — Sound": "https://drive.google.com/uc?export=download&id=1L284ivgw_ApLgKMuC5380aQkWqa8cP5p",
+                "Physics::Study Material::Unit 2 — Theory": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+                "Chemistry::Lab Manuals::Unit 1 — Basics": "https://www.africau.edu/images/default/sample.pdf",
+                "Chemistry::Study Material::Unit 1 — bond": "https://drive.google.com/file/d/1L284ivgw_ApLgKMuC5380aQkWqa8cP5p/view?usp=drivesdk"
+            }
+        };
+
+        const STATE = {
+            view: 'home',
+            currentSubject: null,
+            currentCategory: null,
+            currentUnit: null,
+            downloadsKey: 'studyportal:downloads'
+        };
+
+        /* ============================ Helper utilities ============================ */
+        const $ = sel => document.querySelector(sel);
+        const $$ = sel => [...document.querySelectorAll(sel)];
+        function el(tag, attrs={}, ...children){
+            const e = document.createElement(tag);
+            for(const k in attrs) {
+                if(k.startsWith('on') && typeof attrs[k]==='function') e.addEventListener(k.slice(2), attrs[k]);
+                else if(k==='html') e.innerHTML = attrs[k];
+                else e.setAttribute && e.setAttribute(k, attrs[k]);
+            }
+            children.forEach(c => {
+                if(typeof c==='string') e.appendChild(document.createTextNode(c));
+                else if(c) e.appendChild(c);
+            });
+            return e;
+        }
+
+        /* ============================ Download helper functions ============================ */
+        function showToast(message, duration = 3000) {
+            const toast = $('#downloadToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        function downloadFile(url, filename) {
+            // Create a temporary anchor element
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'download';
+            a.target = '_blank';
+            
+            // Programmatically click the anchor to trigger download
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            // Show success message
+            showToast('Download started! Check your downloads folder.');
+        }
+
+        function handleMobileDownload(url, filename) {
+            // For mobile devices, we need to handle downloads differently
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                // Open in new tab for mobile devices
+                window.open(url, '_blank');
+                showToast('Opening file for Show...');
+            } else {
+                // Standard download for desktop
+                downloadFile(url, filename);
+            }
+        }
+
+        /* ============================ Routing (view switching) ============================ */
+        const views = {
+            home: $('#view-home'),
+            subject: $('#view-subject'),
+            units: $('#view-units'),
+            downloads: $('#view-downloads'),
+            about: $('#view-about')
+        };
+        function showView(name){
+            STATE.view = name;
+            Object.values(views).forEach(v => v.style.display = 'none');
+            if(views[name]) views[name].style.display = '';
+            $$('.topnav button').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+
+        /* ============================ Render functions ============================ */
+        function renderSubjects(){
+            const grid = $('#subjectsGrid');
+            grid.innerHTML = '';
+            DATA.subjects.forEach(s => {
+                const card = el('div',{class:'card', tabindex:0});
+                const icon = el('div',{class:'icon'}, '📚');
+                const h3 = el('h3',{}, s);
+                const p = el('p',{}, `${Math.max(3,2 + (s.length % 6))} resources`);
+                card.append(icon,h3,p);
+                card.onclick = ()=> openSubject(s);
+                card.onkeypress = e => { if(e.key==='Enter') openSubject(s) };
+                grid.appendChild(card);
+            });
+        }
+
+        function renderCategories(subject){
+            $('#subjectTitle').textContent = subject;
+            $('#subjectDesc').textContent = `Choose a category for ${subject}`;
+            const grid = $('#categoriesGrid'); grid.innerHTML = '';
+            DATA.categories.forEach(c => {
+                const card = el('div',{class:'card', tabindex:0});
+                const icon = el('div',{class:'icon'}, c.icon);
+                const h3 = el('h3',{}, c.name);
+                const p = el('p',{class:'small'}, 'Tap to view units');
+                card.append(icon,h3,p);
+                card.onclick = ()=> openUnits(subject, c.name);
+                card.onkeypress = e => { if(e.key==='Enter') openUnits(subject, c.name) };
+                grid.appendChild(card);
+            });
+        }
+
+        function renderUnits(subject, category){
+            $('#unitsTitle').textContent = `${subject} · ${category}`;
+            $('#unitsDesc').textContent = 'Units & resources';
+            const list = $('#unitsList'); list.innerHTML = '';
+            
+            // Get units for this specific subject and category
+            const unitsForSubject = getUnitsForSubjectCategory(subject, category);
+            
+            unitsForSubject.forEach(unit => {
+                const key = `${subject}::${category}::${unit}`;
+                const u = el('div',{class:'unit'});
+                const left = el('div',{class:'left'});
+                const icon = el('div',{style:'width:64px;height:64px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(180deg,#fff,#f2fbff);font-size:26px'}, '📄');
+                const metaBox = el('div',{});
+                const title = el('div',{class:'small unit-title'}, unit);
+                const meta = el('div',{class:'meta'}, `${subject} · ${category}`);
+                metaBox.append(title, meta);
+                left.append(icon, metaBox);
+                const actions = el('div',{class:'actions'});
+                const downloadLink = DATA.sampleLinks[key] || 'https://example-files.online-convert.com/document/pdf/example.pdf';
+                
+                // Create download button with proper mobile handling
+                const downloadBtn = el('button',{class:'btn', onclick: (e)=> { 
+                    e.stopPropagation(); 
+                    handleMobileDownload(downloadLink, `${subject}_${category}_${unit.replace(/\s+/g, '_')}.pdf`);
+                    addToDownloads(key);
+                }}, 'Show');
+                
+                actions.append(downloadBtn);
+                u.append(left, actions);
+                u.onclick = ()=> openDownloads(subject, category, unit);
+                list.appendChild(u);
+            });
+        }
+
+        // Function to get units for a specific subject and category
+        function getUnitsForSubjectCategory(subject, category) {
+            // If we have specific units defined in sampleLinks for this subject and category
+            const specificUnits = [];
+            
+            for (const key in DATA.sampleLinks) {
+                const [s, c, u] = key.split('::');
+                if (s === subject && c === category && !specificUnits.includes(u)) {
+                    specificUnits.push(u);
+                }
+            }
+            
+            // If we found specific units, return them
+            if (specificUnits.length > 0) {
+                return specificUnits;
+            }
+            
+            // Otherwise return the default units
+            return DATA.units;
+        }
+
+        /* ============================ Downloads list & Save ============================ */
+        function addToDownloads(key){
+            let arr = JSON.parse(localStorage.getItem(STATE.downloadsKey) || '[]');
+            if(!arr.includes(key)) { 
+                arr.push(key); 
+                localStorage.setItem(STATE.downloadsKey, JSON.stringify(arr)); 
+                renderSavedDownloads(); 
+            }
+        }
+
+        function renderSavedDownloads(){
+            const list = $('#savedDownloadsList');
+            list.innerHTML = '';
+            const saved = JSON.parse(localStorage.getItem(STATE.downloadsKey) || '[]');
+            if(saved.length === 0){
+                list.innerHTML = `<div class="download-item"><div class="meta small">No saved downloads yet</div></div>`;
+                return;
+            }
+            saved.slice().reverse().forEach(k => {
+                const [s,c,u] = k.split('::');
+                const row = el('div',{class:'download-item'});
+                const left = el('div',{}, el('div',{}, el('strong',{}, u), el('div',{class:'meta'}, `${s} · ${c}`)));
+                const right = el('div',{}, 
+                    el('a',{href: DATA.sampleLinks[k] || '#', target:'_blank', class:'btn', download: `${s}_${c}_${u.replace(/\s+/g, '_')}.pdf`}, 'Download Again'), 
+                    el('button',{class:'btn ghost', onclick: ()=> {
+                        const remaining = saved.filter(x=>x!==k);
+                        localStorage.setItem(STATE.downloadsKey, JSON.stringify(remaining));
+                        renderSavedDownloads();
+                    }}, 'Remove') 
+                );
+                row.append(left, right);
+                list.appendChild(row);
+            });
+        }
+
+        /* ============================ Open subject / units / home ============================ */
+        function openSubject(subject){ STATE.currentSubject = subject; showView('subject'); renderCategories(subject); }
+        function openUnits(subject, category){ STATE.currentSubject = subject; STATE.currentCategory = category; showView('units'); renderUnits(subject, category); }
+
+        $('#backToHomeBtn').onclick = ()=> { showView('home'); };
+        $('#backToSubjectBtn').onclick = ()=> { if(STATE.currentSubject) openSubject(STATE.currentSubject); else showView('home'); };
+
+        /* ============================ Nav init ============================ */
+        function initNav(){
+            $$('nav.topnav button').forEach(btn=>{
+                btn.addEventListener('click', ()=> {
+                    const view = btn.dataset.view;
+                    if (view) {
+                        showView(view);
+                        if(view === 'downloads') renderSavedDownloads();
+                    }
+                });
+            });
+        }
+
+        /* ============================ Hamburger Menu ============================ */
+        function initHamburgerMenu() {
+            const menuBtn = document.querySelector(".menu-toggle");
+            const nav = document.querySelector("nav.topnav");
+
+            menuBtn.addEventListener("click", () => {
+                nav.classList.toggle("show");
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (nav.classList.contains('show') && 
+                    !nav.contains(e.target) && 
+                    !menuBtn.contains(e.target)) {
+                    nav.classList.remove('show');
+                }
+            });
+        }
+
+        /* ============================ Initialization ============================ */
+        async function init(){
+            initNav();
+            initHamburgerMenu();
+            renderSubjects();
+            showView('home');
+            renderSavedDownloads();
+        }
+        init();
+    </script>
+</body>
+</html>
